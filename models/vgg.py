@@ -12,27 +12,30 @@ import torch
 import torch.nn as nn
 
 cfg = {
-    'A' : [64,     'M', 128,      'M', 256, 256,           'M', 512, 512,           'M', 512, 512,           'M'],
-    'B' : [64, 64, 'M', 128, 128, 'M', 256, 256,           'M', 512, 512,           'M', 512, 512,           'M'],
-    'D' : [64, 64, 'M', 128, 128, 'M', 256, 256, 256,      'M', 512, 512, 512,      'M', 512, 512, 512,      'M'],
-    'E' : [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M']
+    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'B':
+    [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'D': [
+        64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M',
+        512, 512, 512, 'M'
+    ],
+    'E': [
+        64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512,
+        512, 'M', 512, 512, 512, 512, 'M'
+    ]
 }
 
-class VGG(nn.Module):
 
+class VGG(nn.Module):
     def __init__(self, features, num_class=100):
         super().__init__()
         self.features = features
 
-        self.classifier = nn.Sequential(
-            nn.Linear(512, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, num_class)
-        )
+        self.classifier = nn.Sequential(nn.Linear(512, 4096),
+                                        nn.ReLU(inplace=True), nn.Dropout(),
+                                        nn.Linear(4096, 4096),
+                                        nn.ReLU(inplace=True), nn.Dropout(),
+                                        nn.Linear(4096, num_class))
 
     def forward(self, x):
         output = self.features(x)
@@ -40,6 +43,7 @@ class VGG(nn.Module):
         output = self.classifier(output)
 
         return output
+
 
 def make_layers(cfg, batch_norm=False):
     layers = []
@@ -60,16 +64,18 @@ def make_layers(cfg, batch_norm=False):
 
     return nn.Sequential(*layers)
 
-def vgg11_bn():
-    return VGG(make_layers(cfg['A'], batch_norm=True))
 
-def vgg13_bn():
-    return VGG(make_layers(cfg['B'], batch_norm=True))
+def vgg11_bn(num_classes):
+    return VGG(make_layers(cfg['A'], batch_norm=True), num_classes)
 
-def vgg16_bn():
-    return VGG(make_layers(cfg['D'], batch_norm=True))
+
+def vgg13_bn(num_classes):
+    return VGG(make_layers(cfg['B'], batch_norm=True), num_classes)
+
+
+def vgg16_bn(num_classes):
+    return VGG(make_layers(cfg['D'], batch_norm=True), num_classes)
+
 
 def vgg19_bn():
     return VGG(make_layers(cfg['E'], batch_norm=True))
-
-
